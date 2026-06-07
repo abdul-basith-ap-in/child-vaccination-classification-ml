@@ -5,10 +5,11 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
-# Paths to model files and data
-MODEL_PATH = r"C:\Users\ACER\Documents\child-vaccination-classification-ml\notebooks\vaccination_xgboost_model.pkl"
-FEATURES_PATH = r"C:\Users\ACER\Documents\child-vaccination-classification-ml\notebooks\feature_names.pkl"
-DATA_PATH = r"C:\Users\ACER\Documents\child-vaccination-classification-ml\data\final_df.xlsx"
+# Paths to model files and data resolved relative to project root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, "notebooks", "vaccination_xgboost_model.pkl")
+FEATURES_PATH = os.path.join(BASE_DIR, "notebooks", "feature_names.pkl")
+DATA_PATH = os.path.join(BASE_DIR, "data", "final_df.xlsx")
 
 # Load the trained model and features
 print("Loading model and features...")

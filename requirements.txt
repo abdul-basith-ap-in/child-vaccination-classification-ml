@@ -1,0 +1,6 @@
+flask
+pandas
+xgboost
+joblib
+openpyxl
+gunicorn
