@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VacciShield | Child Vaccination Classifier</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background Blur Decorative Elements -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="app-container">
+        <!-- Navigation Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <div class="logo-text">
+                    <h1>VacciShield</h1>
+                    <span>Child Immunization Predictor</span>
+                </div>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-btn active" id="tab-predictor" onclick="switchTab('predictor')">
+                    <i class="fa-solid fa-square-poll-horizontal"></i> Predictor
+                </button>
+                <button class="nav-btn" id="tab-analytics" onclick="switchTab('analytics')">
+                    <i class="fa-solid fa-chart-line"></i> Analytics Dashboard
+                </button>
+            </nav>
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <i class="fa-solid fa-moon" id="theme-icon"></i>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            <!-- TAB 1: PREDICTOR -->
+            <section id="section-predictor" class="tab-content active">
+                <div class="predictor-grid">
+                    
+                    <!-- Wizard Card -->
+                    <div class="glass-card form-wizard-card">
+                        <div class="wizard-header">
+                            <h2>Immunization Profiler</h2>
+                            <p>Complete the details below to predict the child's vaccination likelihood.</p>
+                            
+                            <!-- Progress Stepper -->
+                            <div class="stepper">
+                                <div class="step-indicator active" id="step-ind-1">
+                                    <span class="step-num">1</span>
+                                    <span class="step-lbl">Child Info</span>
+                                </div>
+                                <div class="step-line" id="step-line-1"></div>
+                                <div class="step-indicator" id="step-ind-2">
+                                    <span class="step-num">2</span>
+                                    <span class="step-lbl">Socioeconomic</span>
+                                </div>
+                                <div class="step-line" id="step-line-2"></div>
+                                <div class="step-indicator" id="step-ind-3">
+                                    <span class="step-num">3</span>
+                                    <span class="step-lbl">Healthcare</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form -->
+                        <form id="prediction-form" onsubmit="handleFormSubmit(event)">
+                            
+                            <!-- STEP 1: CHILD INFORMATION -->
+                            <div class="form-step active" id="form-step-1">
+                                <h3 class="step-title"><i class="fa-solid fa-baby"></i> Child Information</h3>
+                                
+                                <div class="input-group">
+                                    <label for="child_age_months">Child's Age (12 - 23 Months)</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="child_age_months" name="child_age_months" min="12" max="23" value="12" oninput="updateSliderValue(this)">
+                                        <span class="slider-bubble" id="child_age_bubble">12 months</span>
+                                    </div>
+                                    <small class="field-desc">The age group in months for immunization evaluation.</small>
+                                </div>
+
+                                <div class="input-group">
+                                    <label for="birth_order">Birth Order (Child's number in family)</label>
+                                    <div class="number-stepper">
+                                        <button type="button" class="step-btn" onclick="adjustNumber('birth_order', -1)">-</button>
+                                        <input type="number" id="birth_order" name="birth_order" min="1" max="15" value="1" readonly>
+                                        <button type="button" class="step-btn" onclick="adjustNumber('birth_order', 1)">+</button>
+                                    </div>
+                                    <small class="field-desc">Birth order of this child (e.g., 1 for the firstborn).</small>
+                                </div>
+                            </div>
+
+                            <!-- STEP 2: SOCIOECONOMIC STATUS -->
+                            <div class="form-step" id="form-step-2">
+                                <h3 class="step-title"><i class="fa-solid fa-house-user"></i> Socioeconomic Profile</h3>
+                                
+                                <!-- Wealth Index Selection Cards -->
+                                <div class="input-group">
+                                    <label>Household Wealth Index</label>
+                                    <div class="card-select-grid" id="wealth-select">
+                                        <div class="select-card" data-val="1" onclick="selectCardOption('wealth_index', 1, this)">
+                                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                                            <span>Poorest</span>
+                                        </div>
+                                        <div class="select-card" data-val="2" onclick="selectCardOption('wealth_index', 2, this)">
+                                            <i class="fa-solid fa-wallet"></i>
+                                            <span>Poorer</span>
+                                        </div>
+                                        <div class="select-card active" data-val="3" onclick="selectCardOption('wealth_index', 3, this)">
+                                            <i class="fa-solid fa-scale-balanced"></i>
+                                            <span>Middle</span>
+                                        </div>
+                                        <div class="select-card" data-val="4" onclick="selectCardOption('wealth_index', 4, this)">
+                                            <i class="fa-solid fa-coins"></i>
+                                            <span>Richer</span>
+                                        </div>
+                                        <div class="select-card" data-val="5" onclick="selectCardOption('wealth_index', 5, this)">
+                                            <i class="fa-solid fa-gem"></i>
+                                            <span>Richest</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="wealth_index" name="wealth_index" value="3">
+                                </div>
+
+                                <div class="grid-2-cols">
+                                    <!-- Residence Type -->
+                                    <div class="input-group">
+                                        <label>Residence Location</label>
+                                        <div class="toggle-switch-group">
+                                            <span class="toggle-label-text">Rural</span>
+                                            <label class="switch">
+                                                <input type="checkbox" id="residence_urban" name="residence_urban" value="1">
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <span class="toggle-label-text">Urban</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Automobile Ownership -->
+                                    <div class="input-group">
+                                        <label>Household Vehicle</label>
+                                        <div class="toggle-switch-group">
+                                            <span class="toggle-label-text">No Car</span>
+                                            <label class="switch">
+                                                <input type="checkbox" id="has_automobile" name="has_automobile" value="1">
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <span class="toggle-label-text">Has Car</span>
+                                        </div>
+                                        <small class="field-desc">Owns a motor vehicle (automobile/truck).</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- STEP 3: HEALTHCARE & MATERNAL BACKGROUND -->
+                            <div class="form-step" id="form-step-3">
+                                <h3 class="step-title"><i class="fa-solid fa-stethoscope"></i> Healthcare & Maternal History</h3>
+
+                                <!-- Mother Education Select Cards -->
+                                <div class="input-group">
+                                    <label>Mother's Highest Education Level</label>
+                                    <div class="card-select-grid" id="edu-select">
+                                        <div class="select-card" data-val="0" onclick="selectCardOption('highest_educational_level', 0, this)">
+                                            <i class="fa-solid fa-user-slash"></i>
+                                            <span>No Education</span>
+                                        </div>
+                                        <div class="select-card" data-val="1" onclick="selectCardOption('highest_educational_level', 1, this)">
+                                            <i class="fa-solid fa-school"></i>
+                                            <span>Primary</span>
+                                        </div>
+                                        <div class="select-card active" data-val="2" onclick="selectCardOption('highest_educational_level', 2, this)">
+                                            <i class="fa-solid fa-graduation-cap"></i>
+                                            <span>Secondary</span>
+                                        </div>
+                                        <div class="select-card" data-val="3" onclick="selectCardOption('highest_educational_level', 3, this)">
+                                            <i class="fa-solid fa-building-columns"></i>
+                                            <span>Higher</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="highest_educational_level" name="highest_educational_level" value="2">
+                                </div>
+
+                                <div class="grid-2-cols">
+                                    <!-- Mother Age > 35 -->
+                                    <div class="toggle-card">
+                                        <div class="toggle-card-info">
+                                            <label for="mothers_age_gt_35">Mother's Age > 35</label>
+                                            <span>Is the mother older than 35 years?</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="mothers_age_gt_35" name="mothers_age_gt_35" value="1">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Antenatal Visits Yes -->
+                                    <div class="toggle-card">
+                                        <div class="toggle-card-info">
+                                            <label for="antenatal_visits_yes">Antenatal Care (ANC)</label>
+                                            <span>Attended ANC visits during pregnancy?</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="antenatal_visits_yes" name="antenatal_visits_yes" value="1" checked>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Institutional Delivery -->
+                                    <div class="toggle-card">
+                                        <div class="toggle-card-info">
+                                            <label for="institutional_delivery">Institutional Delivery</label>
+                                            <span>Was delivery in a health facility?</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="institutional_delivery" name="institutional_delivery" value="1" checked>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Health Worker Visit -->
+                                    <div class="toggle-card">
+                                        <div class="toggle-card-info">
+                                            <label for="health_worker_visit">Health Worker Visit</label>
+                                            <span>Visited by health worker in past 12 mos?</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="health_worker_visit" name="health_worker_visit" value="1" checked>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+
+                                    <!-- ICDS Benefits -->
+                                    <div class="toggle-card">
+                                        <div class="toggle-card-info">
+                                            <label for="recieves_icds_benefits">ICDS Benefits</label>
+                                            <span>Received Anganwadi/ICDS benefits?</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="recieves_icds_benefits" name="recieves_icds_benefits" value="1">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Media Exposure -->
+                                    <div class="toggle-card">
+                                        <div class="toggle-card-info">
+                                            <label for="media_exposure">Media Exposure</label>
+                                            <span>Exposed to newspaper, radio, or TV?</span>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="media_exposure" name="media_exposure" value="1" checked>
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Facility Distance Issue -->
+                                <div class="toggle-card full-width-toggle">
+                                    <div class="toggle-card-info">
+                                        <label for="facility_distance_issue">Facility Distance Issue</label>
+                                        <span>Is distance to the health facility a major problem for seeking treatment?</span>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" id="facility_distance_issue" name="facility_distance_issue" value="1">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Footer Buttons -->
+                            <div class="wizard-footer">
+                                <button type="button" class="btn btn-secondary" id="prev-btn" onclick="navigateStep(-1)" disabled>
+                                    <i class="fa-solid fa-arrow-left"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-primary" id="next-btn" onclick="navigateStep(1)">
+                                    Next <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                                <button type="submit" class="btn btn-success hidden" id="submit-btn">
+                                    Analyze Profile <i class="fa-solid fa-flask-vial"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Results Display Panel -->
+                    <div class="glass-card results-card" id="results-panel">
+                        <!-- Default state -->
+                        <div class="results-placeholder" id="results-placeholder">
+                            <div class="pulse-icon">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <h3>Awaiting Analysis</h3>
+                            <p>Fill out the profile information on the left and click "Analyze Profile" to view the predictive assessment.</p>
+                        </div>
+
+                        <!-- Prediction loading state -->
+                        <div class="results-loading hidden" id="results-loading">
+                            <div class="spinner"></div>
+                            <h3>Evaluating Immunization Metrics...</h3>
+                            <p>Running profile parameters through the XGBoost classification model.</p>
+                        </div>
+
+                        <!-- Actual results state -->
+                        <div class="results-content hidden" id="results-content">
+                            <div class="badge-wrapper">
+                                <span class="result-badge" id="prediction-badge">Vaccinated</span>
+                            </div>
+
+                            <div class="radial-gauge-container">
+                                <svg class="radial-gauge" viewBox="0 0 120 120">
+                                    <circle class="gauge-bg" cx="60" cy="60" r="50"></circle>
+                                    <circle class="gauge-fill" id="gauge-progress" cx="60" cy="60" r="50" style="stroke-dasharray: 314; stroke-dashoffset: 314;"></circle>
+                                </svg>
+                                <div class="gauge-text">
+                                    <span id="prob-percentage">0%</span>
+                                    <small>Vaccination Probability</small>
+                                </div>
+                            </div>
+
+                            <div class="result-details">
+                                <p class="result-description" id="result-description">
+                                    The machine learning model projects a high likelihood that the child has completed their primary immunization schedule.
+                                </p>
+                            </div>
+
+                            <!-- Insight Section -->
+                            <div class="insights-container">
+                                <h4><i class="fa-solid fa-lightbulb"></i> Care Plan & Insights</h4>
+                                <ul class="insights-list" id="insights-list">
+                                    <!-- Populated dynamically -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: ANALYTICS -->
+            <section id="section-analytics" class="tab-content">
+                <div class="analytics-overview">
+                    <div class="glass-card stat-card">
+                        <i class="fa-solid fa-users stat-icon"></i>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-total-records">-</span>
+                            <span class="stat-label">Total Survey Records</span>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <i class="fa-solid fa-syringe stat-icon"></i>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-vaccinated-records">-</span>
+                            <span class="stat-label">Fully Vaccinated Children</span>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <i class="fa-solid fa-circle-check stat-icon"></i>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-overall-rate">-</span>
+                            <span class="stat-label">Overall Immunization Rate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <!-- Chart 1: Wealth Index -->
+                    <div class="glass-card chart-card">
+                        <h3>Vaccination Rate by Wealth Quintile</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-wealth"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Education -->
+                    <div class="glass-card chart-card">
+                        <h3>Vaccination Rate by Mother's Education</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-education"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Health Worker Visits -->
+                    <div class="glass-card chart-card">
+                        <h3>Impact of Health Worker Visits</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-hw"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 4: Residence -->
+                    <div class="glass-card chart-card">
+                        <h3>Rural vs Urban Immunization Rates</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-residence"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Chart.js for beautiful charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Main Script -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
